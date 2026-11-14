@@ -21,7 +21,7 @@
 }
 
 @media (prefers-color-scheme:dark) {
-     :root:not([data-theme="light"]) {
+    :root:not([data-theme="light"]) {
         --bg: #121715;
         --card: #1a201d;
         --ink: #e8efe9;
@@ -87,7 +87,7 @@ body::before {
 }
 
 @media (prefers-color-scheme:dark) {
-     :root:not([data-theme="light"]) body::before {
+    :root:not([data-theme="light"]) body::before {
         opacity: .55
     }
 }
@@ -210,7 +210,10 @@ svg.ln path {
 }
 
 .c0 {
-    stroke: var(--e0);
+    stroke: var(--e0)
+}
+
+svg.ln path.c0 {
     stroke-width: 2.2
 }
 
@@ -226,6 +229,65 @@ svg.ln path {
     to {
         stroke-dashoffset: 0
     }
+}
+
+svg.ln path.v {
+    transition: opacity .3s, stroke-width .3s
+}
+
+svg.ln path.hit {
+    stroke: transparent;
+    stroke-width: 16;
+    stroke-linecap: butt;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+    pointer-events: stroke
+}
+
+svg.ln path.fl {
+    stroke: #fff;
+    stroke-width: 1.6;
+    stroke-dasharray: .04 .13;
+    stroke-dashoffset: 0;
+    animation: none;
+    opacity: 0;
+    transition: opacity .3s
+}
+
+.mapin.hv svg.ln path.v {
+    opacity: .15
+}
+
+.mapin.hv svg.ln path.v.on {
+    opacity: 1;
+    stroke-width: 3.6
+}
+
+.mapin.hv svg.ln path.fl.on {
+    opacity: .95;
+    animation: flow .9s linear infinite
+}
+
+@keyframes flow {
+    from {
+        stroke-dashoffset: 0
+    }
+    to {
+        stroke-dashoffset: -.17
+    }
+}
+
+.hd {
+    transition: opacity .3s
+}
+
+.mapin.hv .hd:not(.on) {
+    opacity: .4
+}
+
+.mapin.hv .hd.on a.bx {
+    box-shadow: 0 0 16px rgba(127, 196, 171, .65)
 }
 
 .nd {

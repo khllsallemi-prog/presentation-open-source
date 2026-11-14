@@ -1,13 +1,15 @@
-let lang="en";
-try{lang=localStorage.getItem("l")||"en"}catch(e){}
-if(!U[lang])lang="en";
-const app=document.getElementById("app"),lg=document.getElementById("lg");
+let lang = "en";
+try { lang = localStorage.getItem("l") || "en" } catch (e) {}
+if (!U[lang]) lang = "en";
+const app = document.getElementById("app"),
+    lg = document.getElementById("lg");
 
-const ICON='<svg viewBox="-3 -3 52 40" fill="none" stroke-width="5" stroke-linecap="round"><path d="M4 33V19a19 19 0 0 1 38 0v14" stroke="#3a86ff"/><path d="M13 33V21a10 10 0 0 1 20 0v12" stroke="#7bbcff"/><path d="M19 33V24a4 4 0 0 1 8 0v9" stroke="#a9a6ff"/></svg>';
-function node(label,depth,kids,o){
-  const cls=depth?(depth==1?"d1":kids.length?"d2":"d3"):"d0";
-  const a=o.b==null?`<span class="bx ${cls}">${label}</span>`:`<a class="bx ${cls}" href="${K[o.b]}.html${o.s>0?"#s"+o.s:""}" title="${o.f||""}">${label}</a>`;
-  return `<div class="nd${o.cl?" cl":""}" data-dp="${depth}"><div class="hd" style="--d:${(depth*.15+(o.i||0)*.035).toFixed(2)}s">${a}${kids.length?'<button class="tg" aria-label="+/-"></button>':""}</div>${kids.length?`<div class="ks k${depth}">${kids.join("")}</div>`:""}</div>`;
+const ICON = '<svg viewBox="-3 -3 52 40" fill="none" stroke-width="5" stroke-linecap="round"><path d="M4 33V19a19 19 0 0 1 38 0v14" stroke="#3a86ff"/><path d="M13 33V21a10 10 0 0 1 20 0v12" stroke="#7bbcff"/><path d="M19 33V24a4 4 0 0 1 8 0v9" stroke="#a9a6ff"/></svg>';
+
+function node(label, depth, kids, o) {
+    const cls = depth ? (depth == 1 ? "d1" : kids.length ? "d2" : "d3") : "d0";
+    const a = o.b == null ? `<span class="bx ${cls}">${label}</span>` : `<a class="bx ${cls}" href="${K[o.b]}.html${o.s>0?"#s"+o.s:""}" title="${o.f||""}">${label}</a>`;
+    return `<div class="nd${o.cl?" cl":""}" data-dp="${depth}"><div class="hd" style="--d:${(depth*.15+(o.i||0)*.035).toFixed(2)}s">${a}${kids.length?'<button class="tg" aria-label="+/-"></button>':""}</div>${kids.length?`<div class="ks k${depth}">${kids.join("")}</div>`:""}</div>`;
 }
 function mapHTML(){
   const D=L[lang];
@@ -18,11 +20,12 @@ function mapHTML(){
     return node(p.t,1,kids,{b,s:0,i:b});
   }),{});
 }
+let NDS=[];
 function lines(){
   const m=document.querySelector(".mapin");
   if(!m)return;
   const r=m.getBoundingClientRect();
-  let h="";
+  let h="";NDS=[];
   m.querySelectorAll(".nd").forEach(n=>{
     const ks=n.children[1];
     if(!ks||!n.offsetWidth||n.classList.contains("cl"))return;
@@ -31,10 +34,28 @@ function lines(){
       const c=k.children[0].getBoundingClientRect(),rt=c.left>a.left;
       const x1=(rt?a.right:a.left)-r.left,x2=(rt?c.left:c.right)-r.left;
       const y1=a.top+a.height/2-r.top,y2=c.top+c.height/2-r.top,mx=(x1+x2)/2;
-      h+=`<path class="c${Math.min(dp,2)}" pathLength="1" style="--d:${(dp*.15+.3+i*.03).toFixed(2)}s;${dp?"":"stroke:"+["#4a8cff","#3f9ad0","#3a9a9a","#3f9d7a","#34a853"][i]}" d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}"/>`;
+      const n2=NDS.push(k)-1,d=`M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`;
+      h+=`<path class="v c${Math.min(dp,2)}" data-n="${n2}" pathLength="1" style="--d:${(dp*.15+.3+i*.03).toFixed(2)}s;${dp?"":"stroke:"+["#4a8cff","#3f9ad0","#3a9a9a","#3f9d7a","#34a853"][i]}" d="${d}"/><path class="fl" data-n="${n2}" pathLength="1" d="${d}"/><path class="hit" data-n="${n2}" d="${d}"/>`;
     });
   });
-  m.querySelector("svg").innerHTML=h;
+  m.querySelector("svg.ln").innerHTML=h;
+  const o=hl.c;hl.c=null;hl(o&&o.isConnected?o:null);
+}
+function hl(nd){
+  if(hl.c===nd)return;
+  hl.c=nd;
+  const m=document.querySelector(".mapin");
+  if(!m)return;
+  m.querySelectorAll(".on").forEach(x=>x.classList.remove("on"));
+  m.classList.toggle("hv",!!nd);
+  if(!nd)return;
+  const mk=e=>{
+    e.children[0].classList.add("on");
+    const n=NDS.indexOf(e);
+    if(n>=0)m.querySelectorAll(`[data-n="${n}"]:not(.hit)`).forEach(x=>x.classList.add("on"));
+  };
+  for(let e=nd;e;e=e.parentElement.closest(".nd"))mk(e);
+  if(nd.children[1])[...nd.children[1].children].forEach(mk);
 }
 function page(p,i){
   const u=U[lang],A=u.d=="rtl"?["→","←"]:["←","→"],D=L[lang];
@@ -63,4 +84,6 @@ app.addEventListener("click",e=>{
   if(t){t.closest(".nd").classList.toggle("cl");requestAnimationFrame(lines);return;}
 });
 addEventListener("resize",lines);
+app.addEventListener("mouseover",e=>{const t=e.target.closest(".hd,path.hit");hl(t?(t.matches("path")?NDS[+t.dataset.n]:t.parentElement):null)});
+app.addEventListener("mouseleave",()=>hl(null));
 route();
